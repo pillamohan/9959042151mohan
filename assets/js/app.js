@@ -1,4 +1,25 @@
-const IMAGES = ['img1.jpg', 'img2.jpg', 'img3.jpg', 'img4.jpg', 'img5.jpg', 'img6.jpg', 'img7.png', 'img8.jpg', 'img9.jpg', 'img10.jpg', 'img11.jpg'];
+// Defensive: ensure modal starts hidden (prevents auto-show from interfering scripts)
+(function(){
+  try{
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', () => { try{ const s = document.getElementById('surprise'); if(s && !s.classList.contains('hidden')) s.classList.add('hidden'); } catch(e){} });
+    } else { try{ const s = document.getElementById('surprise'); if(s && !s.classList.contains('hidden')) s.classList.add('hidden'); } catch(e){} }
+  }catch(e){ console.warn('startup modal guard error', e); }
+})();
+
+// revealMore helper (ensures 'Tell her more' works)
+function revealMore() {
+  try {
+    const surpriseText = document.getElementById('surpriseText');
+    if (surpriseText) {
+      surpriseText.textContent = "Sowmya — you light up every day. Today I promise more laughter, more adventures and more 'us'. Love you forever. — Pichii 💖";
+    }
+    try { runConfetti(); } catch(e) {}
+  } catch(e) { console.warn('revealMore error', e); }
+}
+
+// App script for Sowmya site
+const IMAGES = ['img1.png', 'img10.png', 'img11.jpg', 'img12.png', 'img2.jpg', 'img3.jpg', 'img4.jpg', 'img5.jpg', 'img6.jpg', 'img7.jpg', 'img8.png', 'img9.jpg'];
 const audio = document.getElementById('bgAudio');
 const playBtn = document.getElementById('playBtn');
 const enterBtn = document.getElementById('enterBtn');
@@ -12,17 +33,10 @@ const surpriseText = document.getElementById('surpriseText');
 const surpriseBtn = document.getElementById('surpriseBtn');
 const closeSurprise = document.getElementById('closeSurprise');
 
-// revealMore helper (attached via inline onclick)
-function revealMore() {
-  const surpriseText = document.getElementById('surpriseText');
-  if (!surpriseText) return;
-  surpriseText.textContent = "Sowmya — you light up every day. Today I promise more laughter, more adventures and more 'us'. Love you forever. — Pichii 💖";
-  try { runConfetti(); } catch(e) {}
-}
-
-
+// build slideshow and grid
 IMAGES.forEach((name, idx) => {
   const src = 'assets/images/' + name;
+  // slideshow
   const div = document.createElement('div');
   div.className = 'slide';
   div.style.position='absolute';
@@ -30,14 +44,21 @@ IMAGES.forEach((name, idx) => {
   div.style.opacity = idx===0?1:0;
   div.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover">`;
   slideshow.appendChild(div);
+  // grid
   const g = document.createElement('div');
   const im = document.createElement('img');
-  im.src = src; im.alt = 'photo'+(idx+1); g.appendChild(im); grid.appendChild(g);
-  const ev = document.createElement('div'); ev.className='event';
+  im.src = src;
+  im.alt = 'photo'+(idx+1);
+  g.appendChild(im);
+  grid.appendChild(g);
+  // timeline event
+  const ev = document.createElement('div');
+  ev.className='event';
   ev.innerHTML = `<strong>Memory ${(idx+1)}</strong><p>A beautiful moment we shared.</p>`;
   events.appendChild(ev);
 });
 
+// slideshow rotation
 let cur = 0;
 setInterval(()=>{ 
   const slides = slideshow.children;
@@ -47,34 +68,36 @@ setInterval(()=>{
   cur = (cur+1) % slides.length;
   slides[cur].style.transition='opacity .9s';
   slides[cur].style.opacity='1';
-  document.querySelector('.big-photo img').src = slides[cur].querySelector('img').src;
+  const big = document.querySelector('.big-photo img');
+  if (big) big.src = slides[cur].querySelector('img').src;
 },4200);
 
+// enter button
 enterBtn && enterBtn.addEventListener('click', ()=>{ 
-  gsap.to(intro.querySelector('.center'), {duration:0.9, y:-40, opacity:0, onComplete: ()=>{ intro.classList.add('hidden'); main.classList.remove('hidden'); playAudio(); }});
-});
+  gsap.to(intro.querySelector('.center'), {duration:0.9, y:-40, opacity:0, onComplete: ()=>{ intro.classList.add('hidden'); main.classList.remove('hidden'); playAudio(); }}); 
+});// auto show main if user reloads
+// play/pause
+function playAudio(){ audio && audio.play().catch(()=>{}); playBtn.textContent='Pause Music'; }
+function pauseAudio(){ audio && audio.pause(); playBtn.textContent='Play Music'; }
+playBtn && playBtn.addEventListener('click', ()=>{ if(audio && audio.paused) playAudio(); else pauseAudio(); });
 
-function playAudio(){ audio.play().catch(()=>{}); playBtn.textContent='Pause Music'; }
-function pauseAudio(){ audio.pause(); playBtn.textContent='Play Music'; }
-playBtn.addEventListener('click', ()=>{ if(audio.paused) playAudio(); else pauseAudio(); });
+// surprise popup
+surpriseBtn && surpriseBtn.addEventListener('click', ()=>{ surprise && surprise.classList.remove('hidden'); });
+closeSurprise && closeSurprise.addEventListener('click', ()=>{ surprise && surprise.classList.add('hidden'); });
 
-surpriseBtn.addEventListener('click', ()=>{ surprise.classList.remove('hidden'); });
-closeSurprise && closeSurprise.addEventListener('click', ()=>{ surprise.classList.add('hidden'); });
-
-document.getElementById('confetti').addEventListener('click', ()=>{ runConfetti(); });
+// confetti
+document.getElementById('confetti')?.addEventListener('click', ()=>{ runConfetti(); });
 function runConfetti(){ const canvas=document.createElement('canvas'); canvas.style.position='fixed'; canvas.style.left=0; canvas.style.top=0; canvas.style.width='100%'; canvas.style.height='100%'; canvas.style.zIndex=9999; document.body.appendChild(canvas); canvas.width=innerWidth; canvas.height=innerHeight; const ctx=canvas.getContext('2d'); let parts=[]; for(let i=0;i<160;i++) parts.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height-200, vx:-2+Math.random()*4, vy:2+Math.random()*6, r:4+Math.random()*8, c:`hsl(${Math.random()*360} 70% 60%)`}); let t=0; function anim(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(const p of parts){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; ctx.fillStyle=p.c; ctx.fillRect(p.x,p.y,p.r,p.r*1.6);} t++; if(t<240) requestAnimationFrame(anim); else document.body.removeChild(canvas); } anim(); }
 
-// --- three.js particle background — guarded version ---
+// three.js particle background — guarded version
 (function(){
-  // If THREE isn't available (CDN blocked or extension interference), use a lightweight fallback
   if (typeof THREE === 'undefined') {
     try {
       const hero = document.getElementById('heroCanvas');
       if (hero) {
-        // subtle visual fallback so page still looks nice without 3D
         hero.style.background = "radial-gradient(circle at 10% 10%, rgba(255,93,162,0.03), transparent 20%), linear-gradient(180deg, rgba(255,255,255,0.02), transparent)";
       }
-    } catch(e){ console.warn('heroCanvas fallback error', e); }
+    } catch(e) { console.warn('heroCanvas fallback error', e); }
     return;
   }
 
@@ -97,14 +120,13 @@ function runConfetti(){ const canvas=document.createElement('canvas'); canvas.st
     const points = new THREE.Points(geom, mat);
     scene.add(points);
 
-    function animate(){ 
+    function animate(){
       requestAnimationFrame(animate);
       points.rotation.y += 0.001;
       renderer.render(scene, camera);
     }
     animate();
 
-    // resize handling
     window.addEventListener('resize', () => {
       try {
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -115,81 +137,25 @@ function runConfetti(){ const canvas=document.createElement('canvas'); canvas.st
   } catch(e){
     console.warn('three.js init error', e);
   }
-})(); 
-// --- end three.js guard ---
+})();
 
-
-const quotes = [
-  "Every moment with you is my favorite.",
-  "You are my today and all of my tomorrows.",
-  "I fell in love with you in a hundred tiny ways.",
-  "With you, simple moments become magical."
-];
-document.getElementById('moreLove').addEventListener('click', ()=>{ surpriseText.textContent = quotes[Math.floor(Math.random()*quotes.length)] + " — Pichii"; });
-
-window.addEventListener('resize', ()=>{ try{ const c=document.getElementById('heroCanvas'); if(c){ c.width=window.innerWidth; c.height=window.innerHeight; } }catch(e){} });
-// --- START: Robust popup handlers (append at end of assets/js/app.js) ---
+// --- START: Robust popup handlers (append at end) ---
 (function() {
-  // Run after DOM is ready
   function initPopupHandlers() {
     try {
       const surprise = document.getElementById('surprise');
       const surpriseBtn = document.getElementById('surpriseBtn');
       const closeSurprise = document.getElementById('closeSurprise');
       const moreLove = document.getElementById('moreLove');
-
-      // safe no-op if element missing
-      function safeHide() { if (surprise) surprise.classList.add('hidden'); }
-      function safeShow() { if (surprise) surprise.classList.remove('hidden'); }
-
-      // close by button
-      if (closeSurprise) {
-        closeSurprise.addEventListener('click', () => {
-          safeHide();
-        });
-      }
-
-      // open by button
-      if (surpriseBtn) {
-        surpriseBtn.addEventListener('click', () => {
-          safeShow();
-        });
-      }
-
-      // 'Tell her more' fallback — call revealMore if exists
-      if (moreLove) {
-        moreLove.addEventListener('click', () => {
-          if (typeof revealMore === 'function') {
-            revealMore();
-          } else {
-            const surpriseText = document.getElementById('surpriseText');
-            if (surpriseText) surpriseText.textContent = "Sowmya — you light up every day. Love you forever. — Pichii";
-            try { runConfetti(); } catch(e) {}
-          }
-        });
-      }
-
-      // click outside modal to close
-      if (surprise) {
-        surprise.addEventListener('click', (e) => {
-          if (e.target === surprise) safeHide();
-        });
-      }
-
-      // close on Escape key
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') safeHide();
-      });
-
-    } catch (err) {
-      console.warn('Popup init error (non-fatal):', err);
-    }
+      function safeHide(){ if(surprise) surprise.classList.add('hidden'); }
+      function safeShow(){ if(surprise) surprise.classList.remove('hidden'); }
+      if (closeSurprise) closeSurprise.addEventListener('click', safeHide);
+      if (surpriseBtn) surpriseBtn.addEventListener('click', safeShow);
+      if (moreLove) moreLove.addEventListener('click', () => { if (typeof revealMore === 'function') revealMore(); else { const st=document.getElementById('surpriseText'); if(st) st.textContent='Sowmya — you light up every day. — Pichii'; try{ runConfetti(); }catch(e){} } });
+      if (surprise) surprise.addEventListener('click', (e) => { if (e.target === surprise) safeHide(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') safeHide(); });
+    } catch(err) { console.warn('Popup init error', err); }
   }
-
-  if (document.readyState === 'loading') {
-    window.addEventListener('DOMContentLoaded', initPopupHandlers);
-  } else {
-    initPopupHandlers();
-  }
+  if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', initPopupHandlers); else initPopupHandlers();
 })();
 // --- END: Robust popup handlers ---
