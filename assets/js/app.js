@@ -75,3 +75,68 @@ const quotes = [
 document.getElementById('moreLove').addEventListener('click', ()=>{ surpriseText.textContent = quotes[Math.floor(Math.random()*quotes.length)] + " — Pichii"; });
 
 window.addEventListener('resize', ()=>{ try{ const c=document.getElementById('heroCanvas'); if(c){ c.width=window.innerWidth; c.height=window.innerHeight; } }catch(e){} });
+// --- START: Robust popup handlers (append at end of assets/js/app.js) ---
+(function() {
+  // Run after DOM is ready
+  function initPopupHandlers() {
+    try {
+      const surprise = document.getElementById('surprise');
+      const surpriseBtn = document.getElementById('surpriseBtn');
+      const closeSurprise = document.getElementById('closeSurprise');
+      const moreLove = document.getElementById('moreLove');
+
+      // safe no-op if element missing
+      function safeHide() { if (surprise) surprise.classList.add('hidden'); }
+      function safeShow() { if (surprise) surprise.classList.remove('hidden'); }
+
+      // close by button
+      if (closeSurprise) {
+        closeSurprise.addEventListener('click', () => {
+          safeHide();
+        });
+      }
+
+      // open by button
+      if (surpriseBtn) {
+        surpriseBtn.addEventListener('click', () => {
+          safeShow();
+        });
+      }
+
+      // 'Tell her more' fallback — call revealMore if exists
+      if (moreLove) {
+        moreLove.addEventListener('click', () => {
+          if (typeof revealMore === 'function') {
+            revealMore();
+          } else {
+            const surpriseText = document.getElementById('surpriseText');
+            if (surpriseText) surpriseText.textContent = "Sowmya — you light up every day. Love you forever. — Pichii";
+            try { runConfetti(); } catch(e) {}
+          }
+        });
+      }
+
+      // click outside modal to close
+      if (surprise) {
+        surprise.addEventListener('click', (e) => {
+          if (e.target === surprise) safeHide();
+        });
+      }
+
+      // close on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') safeHide();
+      });
+
+    } catch (err) {
+      console.warn('Popup init error (non-fatal):', err);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', initPopupHandlers);
+  } else {
+    initPopupHandlers();
+  }
+})();
+// --- END: Robust popup handlers ---
