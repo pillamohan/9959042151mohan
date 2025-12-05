@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>To My Beautiful Queen Sowmya ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600;800&family=Great+Vibes&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div id="intro" class="intro">
+  <div class="overlay"></div>
+  <div class="center">
+    <h1 class="fancy">To My Beautiful Queen Sowmya ✨</h1>
+    <p class="subtitle">Happy Birthday, Sowmya — from Pichii</p>
+    <button id="enterBtn" class="cta">Open your surprise</button>
+  </div>
+  <canvas id="heroCanvas"></canvas>
+</div>
+
+<main id="main" class="hidden">
+  <header class="site-header">
+    <div class="brand">Pichii ♥ Sowmya</div>
+    <div class="controls">
+      <button id="playBtn" class="ghost">Play Music</button>
+      <button id="surpriseBtn" class="primary">Surprise</button>
+    </div>
+  </header>
+
+  <section class="hero-section">
+    <div class="left">
+      <div class="big-photo" id="bigPhoto">
+        <img src="assets/images/img1.jpg" alt="Sowmya">
+      </div>
+      <div class="summary">
+        <h2>My Love, My Light</h2>
+        <p>Every moment with you is a story I want to keep forever. Swipe through to relive our memories.</p>
+        <div class="actions">
+          <button id="confetti" class="primary">Celebrate 🎉</button>
+          <button id="timelineBtn" class="ghost">View Timeline</button>
+        </div>
+      </div>
+    </div>
+    <aside class="gallery">
+      <div class="slideshow" id="slideshow"></div>
+    </aside>
+  </section>
+
+  <section class="timeline" id="timeline">
+    <h3>Our Story</h3>
+    <div class="events" id="events"></div>
+  </section>
+
+  <section class="gallery-grid" id="galleryGrid">
+    <h3>Moments</h3>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <footer class="site-footer">
+    <div>Made with ❤️ by Pichii</div>
+    <div><small>Open on mobile for the full experience</small></div>
+  </footer>
+</main>
+
+<div id="surprise" class="modal hidden">
+  <div class="modal-inner">
+    <h2>Happy Birthday, Sowmya 🎂</h2>
+    <p id="surpriseText">You are my everything. I love you forever — Pichii</p>
+    <div class="modal-actions">
+      <button id="closeSurprise" class="ghost">Close</button>
+      <button id="moreLove" class="primary" onclick="revealMore()">Tell her more</button>
+    </div>
+  </div>
+</div>
+
+<audio id="bgAudio" src="assets/music/song.mp3" loop></audio>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
