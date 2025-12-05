@@ -64,7 +64,60 @@ closeSurprise && closeSurprise.addEventListener('click', ()=>{ surprise.classLis
 document.getElementById('confetti').addEventListener('click', ()=>{ runConfetti(); });
 function runConfetti(){ const canvas=document.createElement('canvas'); canvas.style.position='fixed'; canvas.style.left=0; canvas.style.top=0; canvas.style.width='100%'; canvas.style.height='100%'; canvas.style.zIndex=9999; document.body.appendChild(canvas); canvas.width=innerWidth; canvas.height=innerHeight; const ctx=canvas.getContext('2d'); let parts=[]; for(let i=0;i<160;i++) parts.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height-200, vx:-2+Math.random()*4, vy:2+Math.random()*6, r:4+Math.random()*8, c:`hsl(${Math.random()*360} 70% 60%)`}); let t=0; function anim(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(const p of parts){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; ctx.fillStyle=p.c; ctx.fillRect(p.x,p.y,p.r,p.r*1.6);} t++; if(t<240) requestAnimationFrame(anim); else document.body.removeChild(canvas); } anim(); }
 
-(function(){ try{ const canvas = document.getElementById('heroCanvas'); const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000); const renderer = new THREE.WebGLRenderer({canvas, alpha:true}); renderer.setSize(window.innerWidth, window.innerHeight); camera.position.z = 80; const geom = new THREE.BufferGeometry(); const count = 600; const pos = new Float32Array(count*3); for(let i=0;i<count*3;i++){ pos[i] = (Math.random()-0.5)*200; } geom.setAttribute('position', new THREE.BufferAttribute(pos,3)); const mat = new THREE.PointsMaterial({size:2, color:0xff5da2}); const points = new THREE.Points(geom, mat); scene.add(points); function animate(){ requestAnimationFrame(animate); points.rotation.y += 0.001; renderer.render(scene,camera); } animate(); }catch(e){console.warn(e);} })();
+// --- three.js particle background — guarded version ---
+(function(){
+  // If THREE isn't available (CDN blocked or extension interference), use a lightweight fallback
+  if (typeof THREE === 'undefined') {
+    try {
+      const hero = document.getElementById('heroCanvas');
+      if (hero) {
+        // subtle visual fallback so page still looks nice without 3D
+        hero.style.background = "radial-gradient(circle at 10% 10%, rgba(255,93,162,0.03), transparent 20%), linear-gradient(180deg, rgba(255,255,255,0.02), transparent)";
+      }
+    } catch(e){ console.warn('heroCanvas fallback error', e); }
+    return;
+  }
+
+  try {
+    const canvas = document.getElementById('heroCanvas');
+    if (!canvas) return;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({canvas, alpha:true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.position.z = 80;
+
+    const geom = new THREE.BufferGeometry();
+    const count = 600;
+    const pos = new Float32Array(count*3);
+    for (let i=0;i<count*3;i++) pos[i] = (Math.random()-0.5)*200;
+    geom.setAttribute('position', new THREE.BufferAttribute(pos,3));
+
+    const mat = new THREE.PointsMaterial({size:2, color:0xff5da2});
+    const points = new THREE.Points(geom, mat);
+    scene.add(points);
+
+    function animate(){ 
+      requestAnimationFrame(animate);
+      points.rotation.y += 0.001;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // resize handling
+    window.addEventListener('resize', () => {
+      try {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+      } catch(e) {}
+    });
+  } catch(e){
+    console.warn('three.js init error', e);
+  }
+})(); 
+// --- end three.js guard ---
+
 
 const quotes = [
   "Every moment with you is my favorite.",
